@@ -66,20 +66,21 @@ driver = webdriver.Firefox()
 driver.get("https://www.linkedin.com/")
 time.sleep(1)
 email = driver.find_element_by_id('login-email')
-email.send_keys("yangtony@umich.edu")
+email.send_keys("email")
 time.sleep(1)
 password = driver.find_element_by_id('login-password')
-password.send_keys("nnsshxsssnnrbt")
+password.send_keys("password")
 
 password.send_keys(Keys.RETURN)
 
 mainsearchbox = driver.find_element_by_id('main-search-box')
-mainsearchbox.send_keys("jinlei chen")
-time.sleep(2)
+mainsearchbox.send_keys("chen jinlei")
+time.sleep(5)
 mainsearchbox.send_keys(Keys.ARROW_DOWN)
+time.sleep(1)
 mainsearchbox.send_keys(Keys.RETURN)
 
-time.sleep(2)
+time.sleep(5)
 
 bgedu = driver.find_element_by_id('background-education')
 edulist = bgedu.find_elements(By.XPATH, './div')
@@ -98,7 +99,11 @@ bglist = bgexp.find_elements(By.XPATH, './div')
 for element in bglist:
 	company = element.find_element(By.XPATH, './/header/h5[not(@*)]').text
 	title = element.find_element(By.XPATH, './/header/h4').text
-	date = str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[1]').text) + ' - ' + str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[2]').text)
+	datelist = element.find_elements(By.XPATH, './/span[@class="experience-date-locale"]/time')
+	if len(datelist) == 2:
+		date = str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[1]').text) + ' - ' + str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[2]').text)
+	else:
+		date = str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[1]').text) + ' - ' + 'present'
 	target.addexprecord(experience(company, title, date))
 
 target.output()
