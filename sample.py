@@ -66,10 +66,10 @@ driver = webdriver.Firefox()
 driver.get("https://www.linkedin.com/")
 time.sleep(1)
 email = driver.find_element_by_id('login-email')
-email.send_keys("yangtony@umich.edu")
+email.send_keys("emailaddress")
 time.sleep(1)
 password = driver.find_element_by_id('login-password')
-password.send_keys("nnsshxsssnnrbt")
+password.send_keys("loginpassword")
 
 password.send_keys(Keys.RETURN)
 
