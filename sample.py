@@ -97,7 +97,10 @@ def fetchdata(driver, target):
 	for element in bglist:
 		company = element.find_element(By.XPATH, './/header/h5[not(@*)]').text
 		title = element.find_element(By.XPATH, './/header/h4').text
-		date = str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[1]').text) + ' - ' + str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[2]').text)
+		if len(datelist) == 2:
+			date = str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[1]').text) + ' - ' + str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[2]').text)
+		else:
+			date = str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[1]').text) + ' - ' + 'present'
 		target.addexprecord(experience(company, title, date))
 
 target = person("Jinlei")
