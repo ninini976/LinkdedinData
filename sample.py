@@ -92,15 +92,21 @@ def search(driver, keyword):
 	try:
 		firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx1 people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
 	except NoSuchElementException:
-		firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx2 people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
+		try:
+			firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx2 people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
+		except NoSuchElementException:
+			return 0
 	firstperson.click()
 	time.sleep(2)
 	return 1
 
 def fetchdata(driver, target):
-	# try:
-	# 	linkedinmember = driver.find_element(By.XPATH, '//span[@class="full-name" and @dir="auto"]').text
-	# 	if linkedinmember = 
+	try:
+		linkedinmember = driver.find_element(By.XPATH, '//span[@class="full-name" and @dir="auto"]').text
+		if linkedinmember == "LinkedIn Member":
+			target.addinfo("This is a linked in member, can't view the profile")
+	except NoSuchElementException:
+		time.sleep(1)
 
 
 	try:
@@ -154,17 +160,18 @@ def fetchdata(driver, target):
 	except NoSuchElementException:
 		print("No background experience found for the target")
 
-target = person("Jinlei")
-
 driver = webdriver.Firefox()
 
 login(driver, '482655720@qq.com', '1a2b3c4dD')
-if search(driver, 'Kai Tang University of Michigan'):	
+
+
+target = person("Men-Chow Chiang")
+if search(driver, 'Men-Chow Chiang'):	
 	fetchdata(driver, target)
 else:
-	print("failed to find the target")
-
+	print("failed to find the target, login fail or no result found")
 target.output()
+
 
 time.sleep(3)
 
