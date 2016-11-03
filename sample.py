@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 import time
+from selenium.common.exceptions import NoSuchElementException
 # display = Display(visible=0, size=(1024, 768))
 # display.start()
 
@@ -42,12 +43,16 @@ class person(object):
 		self.name = name
 		self.edulist = []
 		self.explist = []
+		self.info = ''
 
 	def addedurecord(self, edurecord):
 		self.edulist.append(edurecord)
 
 	def addexprecord(self, exprecord):
 		self.explist.append(exprecord)
+
+	def addinfo(self, info):
+		self.info = info
 
 	def output(self):
 		print("Name of the person:" + self.name)
@@ -67,55 +72,99 @@ def login(driver, emailadd, pswd):
 	password = driver.find_element_by_id('login-password')
 	password.send_keys(pswd)
 	password.send_keys(Keys.RETURN)
+	return 1
 
 def search(driver, keyword):
-	mainsearchbox = driver.find_element_by_id('main-search-box')
+	try:
+		mainsearchbox = driver.find_element_by_id('main-search-box')
+	except NoSuchElementException:
+		print("There is no search box found, you may need to pass some verification manually")
+		cont = input("Problem fixed? y/n")
+		if cont == 'y':
+			mainsearchbox = driver.find_element_by_id('main-search-box')
+		else:
+			return 0
 	mainsearchbox.send_keys(keyword)
 	time.sleep(2)
 	searchbutton = driver.find_element(By.XPATH, '//button[@class="search-button"]')
 	searchbutton.click()
 	time.sleep(2)
-	firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx1 people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
+	try:
+		firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx1 people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
+	except NoSuchElementException:
+		firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx2 people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
 	firstperson.click()
 	time.sleep(2)
+	return 1
 
 def fetchdata(driver, target):
-	bgedu = driver.find_element_by_id('background-education')
-	edulist = bgedu.find_elements(By.XPATH, './div')
+	# try:
+	# 	linkedinmember = driver.find_element(By.XPATH, '//span[@class="full-name" and @dir="auto"]').text
+	# 	if linkedinmember = 
 
-	#TODO: needs to handle some exception when certain information is not provided
 
-	for element in edulist:
-		schoolName = element.find_element(By.XPATH, './/h4').text
-		degree = element.find_element(By.XPATH, './/h5/span[@class="degree"]').text
-		fieldOfStudy = element.find_element(By.XPATH, './/h5/span[@class="major"]').text
-		date = element.find_element(By.XPATH, './/span[@class="education-date"]').text
-		target.addedurecord(education(schoolName, degree, fieldOfStudy, date))
+	try:
+		bgedu = driver.find_element_by_id('background-education')
+		edulist = bgedu.find_elements(By.XPATH, './div')
 
-	bgexp = driver.find_element_by_id('background-experience')
-	bglist = bgexp.find_elements(By.XPATH, './div')
-	for element in bglist:
-		company = element.find_element(By.XPATH, './/header/h5[not(@*)]').text
-		title = element.find_element(By.XPATH, './/header/h4').text
-		if len(datelist) == 2:
-			date = str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[1]').text) + ' - ' + str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[2]').text)
-		else:
-			date = str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[1]').text) + ' - ' + 'present'
-		target.addexprecord(experience(company, title, date))
+		#TODO: needs to handle some exception when certain information is not provided
+
+		for element in edulist:
+			try:	
+				schoolName = element.find_element(By.XPATH, './/h4').text
+			except NoSuchElementException:
+				schoolName = ''
+			try:
+				degree = element.find_element(By.XPATH, './/h5/span[@class="degree"]').text
+			except NoSuchElementException:
+				degree = ''
+			try:
+				fieldOfStudy = element.find_element(By.XPATH, './/h5/span[@class="major"]').text
+			except NoSuchElementException:
+				fieldOfStudy = ''
+			try:
+				date = element.find_element(By.XPATH, './/span[@class="education-date"]').text
+			except NoSuchElementException:
+				date = ''
+			target.addedurecord(education(schoolName, degree, fieldOfStudy, date))
+	except NoSuchElementException:
+		print("No background education found for the target")
+
+	try:
+		bgexp = driver.find_element_by_id('background-experience')
+		bglist = bgexp.find_elements(By.XPATH, './div')
+		for element in bglist:
+			try:
+				company = element.find_element(By.XPATH, './/header/h5[not(@*)]').text
+			except NoSuchElementException:
+				company = ''
+			try:
+				title = element.find_element(By.XPATH, './/header/h4').text
+			except NoSuchElementException:
+				title = ''
+			try:
+				datelist = element.find_elements(By.XPATH, './/span[@class="experience-date-locale"]/time')
+				if len(datelist) == 2:
+					date = str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[1]').text) + ' - ' + str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[2]').text)
+				else:
+					date = str(element.find_element(By.XPATH, './/span[@class="experience-date-locale"]/time[1]').text) + ' - ' + 'present'
+			except NoSuchElementException:
+				date = ''
+			target.addexprecord(experience(company, title, date))
+	except NoSuchElementException:
+		print("No background experience found for the target")
 
 target = person("Jinlei")
 
 driver = webdriver.Firefox()
 
 login(driver, '482655720@qq.com', '1a2b3c4dD')
-search(driver, 'xuefeng hu')
-fetchdata(driver, target)
-
+if search(driver, 'Kai Tang University of Michigan'):	
+	fetchdata(driver, target)
+else:
+	print("failed to find the target")
 
 target.output()
 
 time.sleep(3)
 
-
-driver.quit()
-# display.stop()
