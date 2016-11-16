@@ -140,7 +140,8 @@ def login(driver, emailadd, pswd):
 	password.send_keys(Keys.RETURN)
 	return 1
 
-def search(driver, keyword):
+def search(driver, keyword, num):
+	nextnum = 0
 	try:
 		mainsearchbox = driver.find_element_by_id('main-search-box')
 	except NoSuchElementException:
@@ -148,23 +149,30 @@ def search(driver, keyword):
 		cont = input("Problem fixed? y/n")
 		if cont == 'y':
 			mainsearchbox = driver.find_element_by_id('main-search-box')
-		else:
-			return 0
 	mainsearchbox.send_keys(keyword)
 	time.sleep(2)
 	searchbutton = driver.find_element(By.XPATH, '//button[@class="search-button"]')
 	searchbutton.click()
 	time.sleep(2)
-	try:
-		firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx1 people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
-	except NoSuchElementException:
+	if num == 1:
 		try:
-			firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx2 people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
+			firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx1 people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
+			nextnum = 2
 		except NoSuchElementException:
-			return 0
+			try:
+				firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx2 people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
+				nextnum = 3
+			except NoSuchElementException:
+				return 0
+	else:
+		try:
+			firstperson = driver.find_element(By.XPATH, "//li[@class=\"mod result idx" + str(num) + " people\"]").find_element(By.XPATH,'.//a[@class="title main-headline"]')
+			nextnum = num + 1
+		except NoSuchElementException:
+			return 0	
 	firstperson.click()
 	time.sleep(2)
-	return 1
+	return nextnum
 
 def fetchdata(driver, target):
 	try:
@@ -240,6 +248,11 @@ def fetchdata(driver, target):
 	except NoSuchElementException:
 		print("No background experience found for the target")
 
+
+# def validation(keyword, target):
+
+
+
 #driver = webdriver.Firefox()
 #login(driver, '482655720@qq.com', '1a2b3c4dD')
 
@@ -276,7 +289,7 @@ login(driver, '482655720@qq.com', '1a2b3c4dD')
 # 	print(target.outputstr())	
 
 target = person("Yulin Xie")
-if search(driver, "Yulin Xie"):	
+if search(driver, "Yulin Xie", 1):	
 	fetchdata(driver, target)
 else:
 	print("failed to find the target, login fail or no result found")
